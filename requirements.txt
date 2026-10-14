@@ -1,6 +1,7 @@
-streamlit
+streamlit==1.39.0
 pandas
-matplotlib
-joblib
+numpy
 scikit-learn
-
+joblib
+matplotlib
+pyarrow==14.0.1
