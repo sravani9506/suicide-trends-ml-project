@@ -342,8 +342,8 @@ with st.sidebar:
 
     st.markdown("""
     <div style='padding: 5px 0px;'>
-        <p style='font-size: 13px; font-weight: 700; color: #38BDF8 !important; margin: 0;'>Academic Project Prototype</p>
-        <p style='font-size: 11px; color: #94A3B8 !important; margin: 0;'>Machine Learning Project</p>
+        <p style='font-size: 13px; font-weight: 700; color: #38BDF8 !important; margin: 0;'>Machine Learning Project</p>
+        <p style='font-size: 11px; color: #94A3B8 !important; margin: 0;'> </p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -471,9 +471,9 @@ elif page == "🤖 Machine Learning Center":
         rf_r2 = ml_results["Random Forest Regressor"]["r2"]
         dt_r2 = ml_results["Decision Tree Regressor"]["r2"]
 
-        m_col1.metric("Linear Regression R²", f"{lr_r2:.4f}")
-        m_col2.metric("Random Forest R²", f"{rf_r2:.4f}")
-        m_col3.metric("Decision Tree R²", f"{dt_r2:.4f}")
+        m_col1.metric("Linear Regression ", f"{lr_r2:.4f}")
+        m_col2.metric("Random Forest ", f"{rf_r2:.4f}")
+        m_col3.metric("Decision Tree ", f"{dt_r2:.4f}")
 
         st.divider()
 
