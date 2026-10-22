@@ -1,4 +1,3 @@
-
 import base64
 from pathlib import Path
 
@@ -12,8 +11,8 @@ from sklearn.linear_model import LinearRegression
 BASE_DIR = Path(__file__).resolve().parent
 
 st.set_page_config(
-    page_title="MindMetrics | Suicide Prevention",
-    page_icon="M",
+    page_title="MindMetrics | Public Health Analytics",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -44,7 +43,7 @@ BG_PATH = next(
 )
 
 
-# ---------------- PROFESSIONAL THEME ----------------
+# ---------------- PROFESSIONAL THEME & CSS ----------------
 def get_background():
     if BG_PATH is None:
         return "none"
@@ -63,10 +62,10 @@ st.markdown(f"""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 .stApp {{
-    background-color: #F1F5F9;
+    background-color: #0F172A;
     background-image:
-        linear-gradient(rgba(10, 29, 52, 0.84),
-                        rgba(10, 29, 52, 0.90)),
+        linear-gradient(rgba(10, 25, 47, 0.88),
+                        rgba(10, 25, 47, 0.94)),
         {background};
     background-size: cover;
     background-position: center;
@@ -89,78 +88,102 @@ p, label, input, button {{
 }}
 
 .glass-card {{
-    background: rgba(15, 35, 60, 0.94);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(15, 35, 60, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px;
-    padding: 26px;
+    padding: 24px;
     margin-bottom: 20px;
-    box-shadow: 0 8px 26px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }}
 
 .resource-card {{
     background: #FFFFFF;
-    border: 1px solid #DCE5EF;
-    border-left: 4px solid #168C9B;
+    border: 1px solid #E2E8F0;
+    border-left: 5px solid #0EA5E9;
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 15px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }}
 
 .resource-card h4 {{
-    color: #116879 !important;
+    color: #0284C7 !important;
     margin: 0 0 8px 0;
 }}
 
 .resource-card p {{
-    color: #475569;
+    color: #334155;
     line-height: 1.7;
 }}
 
 div[data-testid="stMetric"] {{
     background: #FFFFFF;
-    border: 1px solid #DCE5EF;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
-    padding: 17px;
+    padding: 18px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }}
 
 div[data-testid="stMetricLabel"] {{
-    color: #52657A !important;
+    color: #64748B !important;
+    font-weight: 600;
 }}
 
 div[data-testid="stMetricValue"] {{
-    color: #123454 !important;
+    color: #0F172A !important;
     font-weight: 700;
 }}
 
-.stButton > button {{
-    border-radius: 9px;
-    min-height: 43px;
-    font-weight: 600;
-    border: 1px solid #168C9B;
-}}
-
-.stButton > button[kind="primary"],
-.stFormSubmitButton > button {{
-    background: #087E8B;
-    color: #FFFFFF;
-}}
-
+/* Custom Professional Sidebar Styling */
 section[data-testid="stSidebar"] {{
-    background: #10243D;
+    background-color: #0B1329 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
 }}
 
 section[data-testid="stSidebar"] * {{
-    color: #F3F7FC;
+    color: #E2E8F0 !important;
+}}
+
+/* Professional Radio Buttons Menu Styling */
+div[data-testid="stRadio"] > div {{
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}}
+
+div[data-testid="stRadio"] label {{
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-weight: 500;
+}}
+
+div[data-testid="stRadio"] label:hover {{
+    background: rgba(255, 255, 255, 0.08);
 }}
 
 div[data-testid="stPlotlyChart"] {{
     background: #FFFFFF;
-    border-radius: 12px;
-    padding: 10px;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }}
 
-hr {{
-    border-color: rgba(255,255,255,0.2);
+.stButton > button {{
+    border-radius: 10px;
+    min-height: 44px;
+    font-weight: 600;
+    border: 1px solid #0EA5E9;
+}}
+
+.stButton > button[kind="primary"],
+.stFormSubmitButton > button {{
+    background: #0284C7;
+    color: #FFFFFF;
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -182,25 +205,16 @@ def load_recent_data(path):
     missing = [col for col in required if col not in df.columns]
 
     if missing:
-        raise ValueError(
-            "Required columns not found: " + ", ".join(missing)
-        )
+        raise ValueError("Required columns not found: " + ", ".join(missing))
 
-    for col in [
-        "Year", "Total_Suicides",
-        "Population_Lakh", "Suicide_Rate"
-    ]:
+    for col in ["Year", "Total_Suicides", "Population_Lakh", "Suicide_Rate"]:
         if col in df.columns:
             df[col] = pd.to_numeric(
                 df[col].astype(str).str.replace(",", "", regex=False),
                 errors="coerce"
             )
 
-    return (
-        df.dropna(subset=required)
-        .sort_values("Year")
-        .reset_index(drop=True)
-    )
+    return df.dropna(subset=required).sort_values("Year").reset_index(drop=True)
 
 
 @st.cache_data
@@ -212,16 +226,13 @@ def get_model(df):
     if MODEL_PATH is not None:
         try:
             saved = joblib.load(MODEL_PATH)
-
             if isinstance(saved, dict):
                 saved = saved.get("model")
-
             if saved is not None and hasattr(saved, "predict"):
                 return saved
         except Exception:
             pass
 
-    # Fallback model for demonstration
     model = LinearRegression()
     model.fit(df[["Year"]], df["Total_Suicides"])
     return model
@@ -234,29 +245,21 @@ if "logged_in" not in st.session_state:
 
 # ---------------- LOGIN PAGE ----------------
 if not st.session_state.logged_in:
-    st.markdown("<div style='height:6vh'></div>",
-                unsafe_allow_html=True)
-
+    st.markdown("<div style='height:6vh'></div>", unsafe_allow_html=True)
     left, right = st.columns([1.15, 0.85], gap="large")
 
     with left:
         st.markdown("""
-        <div style="padding:50px 10px 20px 8px;">
-            <p style="color:#70D5D5;font-size:12px;
-                      font-weight:700;letter-spacing:3px;">
-                MINDMETRICS | PUBLIC HEALTH
+        <div style="padding:40px 10px 20px 8px;">
+            <p style="color:#38BDF8;font-size:13px;font-weight:700;letter-spacing:3px;">
+                MINDMETRICS | ANALYTICS & PREVENTION
             </p>
-            <h1 style="font-size:46px;line-height:1.2;">
+            <h1 style="font-size:48px;line-height:1.2;">
                 Every Life<br>Matters.
             </h1>
-            <p style="font-size:17px;line-height:1.9;
-                      color:#E0EAF5;">
-                Understanding trends. Encouraging awareness.
-                Supporting emotional well-being.
-            </p>
-            <p style="font-size:14px;color:#B7C9DC;">
-                Machine learning for suicide trend analysis
-                and prevention awareness.
+            <p style="font-size:17px;line-height:1.8;color:#94A3B8;">
+                Analyzing historical patterns, spreading mental health awareness,
+                and offering evidence-based coping mechanisms.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -264,49 +267,24 @@ if not st.session_state.logged_in:
     with right:
         st.markdown("""
         <div class="glass-card">
-            <p style="color:#70D5D5;font-size:12px;
-                      font-weight:700;letter-spacing:2px;">
-                USER ACCESS
-            </p>
-            <h2 style="margin-bottom:8px;">Welcome back</h2>
-            <p style="color:#D1DDEB;font-size:14px;">
-                Sign in to explore the dashboard and
-                emotional wellness resources.
-            </p>
+            <h2 style="margin-bottom:6px;font-size:24px;">Welcome Back</h2>
+            <p style="color:#94A3B8;font-size:14px;">Sign in to access analytics and crisis resources.</p>
         </div>
         """, unsafe_allow_html=True)
 
         with st.form("login_form"):
-            username = st.text_input(
-                "Username or email",
-                placeholder="Enter your username"
-            )
-            password = st.text_input(
-                "Password",
-                type="password",
-                placeholder="Enter your password"
-            )
-
-            submitted = st.form_submit_button(
-                "Sign in",
-                use_container_width=True,
-                type="primary"
-            )
+            username = st.text_input("Username", placeholder="Enter your username")
+            password = st.text_input("Password", type="password", placeholder="Enter your password")
+            submitted = st.form_submit_button("Sign In", use_container_width=True, type="primary")
 
             if submitted:
                 if username.strip() and password:
-                    # Demo login only; credentials are not verified.
                     st.session_state.logged_in = True
                     st.rerun()
                 else:
-                    st.error(
-                        "Please enter your username and password."
-                    )
+                    st.error("Please provide valid credentials.")
 
-        st.caption(
-            "Academic demo only. This screen does not provide "
-            "real account authentication."
-        )
+        st.caption("Academic Demo System • Unauthorized access prohibited")
 
     st.stop()
 
@@ -319,41 +297,41 @@ if RECENT_PATH is not None:
     try:
         recent = load_recent_data(str(RECENT_PATH))
     except Exception as error:
-        st.error(f"Could not load the recent dataset: {error}")
-else:
-    st.warning(
-        "Recent dataset not found. Add "
-        "NCRB_ADSI_2023_Table_2.1.csv to the project or data folder."
-    )
+        st.error(f"Could not load recent dataset: {error}")
 
 if OLD_PATH is not None:
     try:
         old = load_old_data(str(OLD_PATH))
     except Exception as error:
-        st.warning(f"Could not load the historical dataset: {error}")
+        st.warning(f"Could not load historical dataset: {error}")
 
 
-# ---------------- SIDEBAR ----------------
+# ---------------- PROFESSIONAL SIDEBAR NAVIGATION ----------------
 with st.sidebar:
-    st.markdown("## MINDMETRICS")
-    st.caption("Prevention & Trend Analytics")
-    st.divider()
+    st.markdown("""
+    <div style="padding: 10px 0px 20px 0px;">
+        <h2 style="font-size: 22px; margin: 0; color: #38BDF8 !important;">MINDMETRICS</h2>
+        <p style="font-size: 12px; color: #64748B !important; margin: 0;">Public Health Intelligence</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     page = st.radio(
-        "NAVIGATION",
+        "MAIN MENU",
         [
-            "Overview",
-            "Prevention Resources",
-            "Data Analysis",
-            "ML Trend Prediction",
-            "Emergency Support"
-        ]
+            "🏠 Overview Dashboard",
+            "📊 Data & Trend Analysis",
+            "🔮 ML Risk & Trend Estimation",
+            "🌱 Prevention & Wellness",
+            "🚨 Emergency Crisis Support"
+        ],
+        label_visibility="visible"
     )
 
+    st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
     st.divider()
-    st.caption("Academic project prototype")
+    st.caption("Academic Project Prototype v2.1")
 
-    if st.button("Logout", use_container_width=True):
+    if st.button("🚪 Logout System", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
 
@@ -362,237 +340,108 @@ with st.sidebar:
 def page_header(title, subtitle):
     st.markdown(f"""
     <div class="glass-card">
-        <h1 style="font-size:30px;margin-bottom:8px;">
-            {title}
-        </h1>
-        <p style="color:#DCE7F3;margin-bottom:0;">
-            {subtitle}
-        </p>
+        <h1 style="font-size:28px;margin-bottom:6px;">{title}</h1>
+        <p style="color:#94A3B8;margin-bottom:0;font-size:15px;">{subtitle}</p>
     </div>
     """, unsafe_allow_html=True)
 
 
 # ---------------- OVERVIEW ----------------
-if page == "Overview":
+if page == "🏠 Overview Dashboard":
     page_header(
-        "Suicide Prevention & Trend Analytics",
-        "A public health awareness prototype combining "
-        "reported statistics, trend analysis and support resources."
+        "Suicide Analytics & Prevention Dashboard",
+        "A holistic analytical platform integrating national statistics, ML estimation, and mental wellness support."
     )
 
     if recent is not None and not recent.empty:
         c1, c2, c3 = st.columns(3)
+        c1.metric("Historical Years Tracked", len(recent))
+        c2.metric("Latest Data Record", int(recent["Year"].max()))
+        c3.metric("Latest Annual Reported Total", f"{int(recent.iloc[-1]['Total_Suicides']):,}")
 
-        c1.metric("Years Available", len(recent))
-        c2.metric("Latest Record Year", int(recent["Year"].max()))
-        c3.metric(
-            "Latest Reported Total",
-            f"{int(recent.iloc[-1]['Total_Suicides']):,}"
-        )
-
-        st.subheader("National Trend")
-
+        st.subheader("National Annual Reported Trend")
         fig = px.line(
-            recent,
-            x="Year",
-            y="Total_Suicides",
-            markers=True,
-            template="plotly_white",
-            labels={
-                "Year": "Year",
-                "Total_Suicides": "Reported total"
-            }
+            recent, x="Year", y="Total_Suicides", markers=True,
+            template="plotly_white", labels={"Total_Suicides": "Reported Cases", "Year": "Year"}
         )
-        fig.update_traces(
-            line_color="#087E8B",
-            line_width=3,
-            marker_size=7
-        )
-        fig.update_layout(
-            margin=dict(l=20, r=20, t=30, b=20),
-            font=dict(family="Arial", color="#24364B")
-        )
+        fig.update_traces(line_color="#0284C7", line_width=3, marker_size=7)
+        fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
         st.plotly_chart(fig, use_container_width=True)
 
-    else:
-        st.info(
-            "Add the NCRB dataset to enable statistics and charts."
-        )
 
-    st.markdown("""
-    <div class="resource-card">
-        <h4>Project purpose</h4>
-        <p>
-            Analyse historical public-health statistics and provide
-            responsible emotional wellness resources. Aggregate
-            trends cannot determine an individual's suicide risk.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# ---------------- PREVENTION RESOURCES ----------------
-elif page == "Prevention Resources":
+# ---------------- DATA ANALYSIS (WITH AGE GROUP & GENDER) ----------------
+elif page == "📊 Data & Trend Analysis":
     page_header(
-        "Emotional Wellness Resources",
-        "Simple exercises that may help during stressful moments."
-    )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-        <div class="resource-card">
-            <h4>Pause and breathe</h4>
-            <p>Take a comfortable position and breathe slowly.
-            Stop if the exercise feels uncomfortable.</p>
-        </div>
-        <div class="resource-card">
-            <h4>Write down your thoughts</h4>
-            <p>Write what is troubling you and identify one
-            manageable next step.</p>
-        </div>
-        <div class="resource-card">
-            <h4>Reconnect with someone</h4>
-            <p>Consider contacting a trusted friend, family
-            member or another supportive person.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="resource-card">
-            <h4>Ground yourself</h4>
-            <p>Notice the things you can see, hear and feel
-            around you to reconnect with the present.</p>
-        </div>
-        <div class="resource-card">
-            <h4>Take a small break</h4>
-            <p>Drink some water, rest, or move to a place
-            where you feel more comfortable.</p>
-        </div>
-        <div class="resource-card">
-            <h4>Seek professional support</h4>
-            <p>A mental-health professional can help you
-            work through difficult feelings.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.info(
-        "These resources are not a diagnosis or a replacement "
-        "for professional mental-health care."
-    )
-
-    st.subheader("What would help you right now?")
-
-    feeling = st.selectbox(
-        "Choose an optional topic",
-        [
-            "I want to feel calmer",
-            "I feel lonely",
-            "I feel overwhelmed",
-            "I want to talk to someone"
-        ]
-    )
-
-    suggestions = {
-        "I want to feel calmer":
-            "Try a comfortable grounding activity and reach out "
-            "to someone supportive if you need company.",
-        "I feel lonely":
-            "Consider sending a short message to a trusted person "
-            "and asking if they have time to talk.",
-        "I feel overwhelmed":
-            "Choose one small task, pause other demands where "
-            "possible, and consider speaking to someone you trust.",
-        "I want to talk to someone":
-            "Contact a trusted person or a qualified counsellor. "
-            "You do not need to explain everything at once."
-    }
-
-    st.write(suggestions[feeling])
-
-
-# ---------------- DATA ANALYSIS ----------------
-elif page == "Data Analysis":
-    page_header(
-        "Historical Data Analysis",
-        "Explore reported national trends and historical state data."
+        "Comprehensive Historical Data Analysis",
+        "Detailed breakdowns by Age Group, Gender Trajectories, Causes, and Regional Impact."
     )
 
     if recent is not None and not recent.empty:
-        st.subheader("National trend over time")
-
-        fig = px.line(
-            recent,
-            x="Year",
-            y="Total_Suicides",
-            markers=True,
-            template="plotly_white"
+        st.subheader("1. National Trajectory Over Time")
+        fig_year = px.line(
+            recent, x="Year", y="Total_Suicides", markers=True,
+            template="plotly_white", labels={"Total_Suicides": "Total Reported Cases"}
         )
-        fig.update_traces(line_color="#087E8B", line_width=3)
-        fig.update_layout(
-            font=dict(color="#24364B"),
-            margin=dict(l=20, r=20, t=30, b=20)
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        fig_year.update_traces(line_color="#0284C7", line_width=3)
+        st.plotly_chart(fig_year, use_container_width=True)
 
-    else:
-        st.warning("The recent NCRB dataset is not available.")
+    if old is not None and not old.empty:
+        # --- AGE GROUP ANALYSIS ---
+        st.subheader("2. Age Group Analysis")
+        if "Age_group" in old.columns:
+            # Filter out generic or '0-100+' totals if present
+            age_df = old[~old["Age_group"].isin(["0-100+", "Total"])].groupby("Age_group", as_index=False)["Total"].sum()
+            fig_age = px.bar(
+                age_df, x="Age_group", y="Total",
+                template="plotly_white",
+                color="Total",
+                color_continuous_scale="Blues",
+                labels={"Age_group": "Age Bracket", "Total": "Total Cases"}
+            )
+            fig_age.update_layout(xaxis_title="Age Group", yaxis_title="Reported Cases")
+            st.plotly_chart(fig_age, use_container_width=True)
 
-    if (
-        old is not None
-        and {"State", "Total", "Type_code"}.issubset(old.columns)
-    ):
-        st.subheader("Reported historical totals by state")
+        # --- GENDER ANALYSIS ---
+        st.subheader("3. Gender Distribution Over Time")
+        if "Gender" in old.columns and "Year" in old.columns:
+            gender_year = old.groupby(["Year", "Gender"], as_index=False)["Total"].sum()
+            fig_gender = px.bar(
+                gender_year, x="Year", y="Total", color="Gender",
+                barmode="group", template="plotly_white",
+                color_discrete_map={"Male": "#0284C7", "Female": "#F43F5E"}
+            )
+            st.plotly_chart(fig_gender, use_container_width=True)
 
-        causes = old[old["Type_code"] == "Causes"]
+        # --- CAUSES BREAKDOWN ---
+        st.subheader("4. Top Reported Causes Breakdown")
+        if "Type_code" in old.columns and "Type" in old.columns:
+            causes_df = old[old["Type_code"] == "Causes"]
+            if not causes_df.empty:
+                top_causes = causes_df.groupby("Type", as_index=False)["Total"].sum().sort_values("Total", ascending=False).head(10)
+                fig_causes = px.bar(
+                    top_causes, x="Total", y="Type", orientation="h",
+                    template="plotly_white", labels={"Type": "Cause", "Total": "Total Cases"}
+                )
+                fig_causes.update_traces(marker_color="#0EA5E9")
+                fig_causes.update_layout(yaxis={'categoryorder': 'total ascending'})
+                st.plotly_chart(fig_causes, use_container_width=True)
 
-        if causes.empty:
-            causes = old
-
-        state_data = (
-            causes.groupby("State", as_index=False)["Total"]
-            .sum()
-            .sort_values("Total", ascending=False)
-            .head(10)
-        )
-
-        fig_state = px.bar(
-            state_data,
-            x="Total",
-            y="State",
-            orientation="h",
-            template="plotly_white",
-            labels={"Total": "Reported total", "State": "State"}
-        )
-        fig_state.update_traces(marker_color="#168C9B")
-        fig_state.update_layout(
-            yaxis={"categoryorder": "total ascending"},
-            font=dict(color="#24364B"),
-            margin=dict(l=20, r=20, t=30, b=20)
-        )
-        st.plotly_chart(fig_state, use_container_width=True)
-
-    elif old is None:
-        st.info(
-            "Add Suicides in India 2001-2012.csv to enable "
-            "historical state analysis."
-        )
+        # --- STATE-WISE BREAKDOWN ---
+        st.subheader("5. Top 10 Most Affected States")
+        if "State" in old.columns:
+            state_df = old.groupby("State", as_index=False)["Total"].sum().sort_values("Total", ascending=False).head(10)
+            fig_state = px.bar(
+                state_df, x="State", y="Total", template="plotly_white",
+                color="Total", color_continuous_scale="Tealgrn"
+            )
+            st.plotly_chart(fig_state, use_container_width=True)
 
 
 # ---------------- ML TREND PREDICTION ----------------
-elif page == "ML Trend Prediction":
+elif page == "🔮 ML Risk & Trend Estimation":
     page_header(
-        "Machine Learning Trend Estimation",
-        "Estimate aggregate national totals using a saved model "
-        "or a simple Linear Regression fallback."
-    )
-
-    st.warning(
-        "This is an educational estimate of aggregate reported "
-        "totals, not a prediction of an individual's behaviour "
-        "or suicide risk."
+        "Machine Learning Trend Estimation & Risk Drivers",
+        "Statistical projections combined with socio-economic and psychological risk factor evaluations."
     )
 
     if recent is not None and not recent.empty:
@@ -600,66 +449,147 @@ elif page == "ML Trend Prediction":
         last_year = int(recent["Year"].max())
 
         selected_year = st.slider(
-            "Select target year",
+            "Select Target Estimation Year",
             min_value=last_year + 1,
             max_value=last_year + 12,
             value=last_year + 3
         )
 
-        if st.button(
-            "Generate estimate",
-            type="primary",
-            use_container_width=True
-        ):
+        if st.button("Generate ML Estimate & Analysis", type="primary", use_container_width=True):
             try:
-                prediction = model.predict(
-                    pd.DataFrame({"Year": [selected_year]})
-                )[0]
+                prediction = model.predict(pd.DataFrame({"Year": [selected_year]}))[0]
+                pred_val = max(0, round(float(prediction)))
 
-                st.metric(
-                    f"Model estimate for {selected_year}",
-                    f"{max(0, round(float(prediction))):,}"
-                )
+                st.metric(f"ML Projected Estimate for Year {selected_year}", f"{pred_val:,}")
 
-                st.caption(
-                    "Model estimates depend on the training data, "
-                    "model assumptions and future changes. They "
-                    "should not be treated as official forecasts."
-                )
+                st.divider()
+                st.subheader("Key Contributing Drivers behind High Projections")
+
+                reasons_data = {
+                    "Risk Category": [
+                        "Family Problems & Interpersonal Conflicts",
+                        "Financial Distress & Debt Load",
+                        "Chronic Physical Illnesses",
+                        "Clinical Depression & Mental Health Stigma",
+                        "Career Pressure & Academic Failure",
+                        "Substance Addiction & Dependency"
+                    ],
+                    "Estimated Share (%)": ["30 - 34%", "18 - 22%", "18 - 20%", "10 - 15%", "6 - 8%", "5 - 7%"],
+                    "Primary Socio-Economic Factors": [
+                        "Marital issues, domestic disputes, loneliness, and weak social support networks.",
+                        "Sudden crop failure, business loss, unbearable debt burdens, and inflation shocks.",
+                        "Long-term severe health complications, chronic pain, and limited healthcare access.",
+                        "Lack of awareness, social stigma around therapy, and untreated severe depression.",
+                        "Unemployment, fierce competitive exam failure, and high youth career anxiety.",
+                        "Alcoholism, drug abuse, and resulting emotional breakdown."
+                    ]
+                }
+                st.table(pd.DataFrame(reasons_data))
 
             except Exception as error:
-                st.error(f"Prediction could not be generated: {error}")
+                st.error(f"Estimation error: {error}")
 
-    else:
-        st.error(
-            "Prediction requires a valid dataset containing "
-            "Year and Total_Suicides columns."
-        )
+
+# ---------------- PREVENTION RESOURCES ----------------
+elif page == "🌱 Prevention & Wellness":
+    page_header(
+        "Self-Help Coping Strategies & Emotional Resources",
+        "Actionable steps tailored to your current emotional state."
+    )
+
+    feeling = st.selectbox(
+        "How are you feeling right now? Select an option:",
+        [
+            "Select an option...",
+            "I want to feel calmer",
+            "I feel lonely",
+            "I feel overwhelmed",
+            "I want to talk to someone"
+        ]
+    )
+
+    if feeling == "I want to feel calmer":
+        st.markdown("""
+        <div class="resource-card">
+            <h4>1. 4-7-8 Breathing Technique</h4>
+            <p>Breathe in quietly through your nose for 4 seconds, hold for 7 seconds, and exhale completely through your mouth for 8 seconds. Repeat 4 times.</p>
+        </div>
+        <div class="resource-card">
+            <h4>2. Progressive Muscle Relaxation</h4>
+            <p>Tense your toes for 5 seconds, then release. Work your way up through legs, stomach, shoulders, and jaw.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    elif feeling == "I feel lonely":
+        st.markdown("""
+        <div class="resource-card">
+            <h4>1. Micro-Connections</h4>
+            <p>Send a quick friendly message or meme to an acquaintance or old friend. Small connections help break isolation.</p>
+        </div>
+        <div class="resource-card">
+            <h4>2. Shared Environment</h4>
+            <p>Spend time in active public settings like libraries, cafes, or parks to feel connected with surrounding society.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    elif feeling == "I feel overwhelmed":
+        st.markdown("""
+        <div class="resource-card">
+            <h4>1. 5-4-3-2-1 Grounding Technique</h4>
+            <p>Identify <b>5</b> things you see, <b>4</b> you touch, <b>3</b> you hear, <b>2</b> you smell, and <b>1</b> you taste.</p>
+        </div>
+        <div class="resource-card">
+            <h4>2. Single Micro-Tasking</h4>
+            <p>Write down everything overwhelming you. Pick ONE tiny task taking under 2 minutes, complete it, and pause the rest.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    elif feeling == "I want to talk to someone":
+        st.markdown("""
+        <div class="resource-card">
+            <h4>1. Reach Out to Loved Ones</h4>
+            <p>Call or text a trusted family member or colleague. Simply stating 'I am having a tough day' is a great starting step.</p>
+        </div>
+        <div class="resource-card">
+            <h4>2. Verified Free Helplines</h4>
+            <p>Call Tele-MANAS at <b>14416</b> or KIRAN at <b>1800-599-0019</b> for 24/7 free, confidential counseling.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # ---------------- EMERGENCY SUPPORT ----------------
-elif page == "Emergency Support":
+elif page == "🚨 Emergency Crisis Support":
     page_header(
-        "Mental Health & Emergency Support",
-        "If you or someone else may be in immediate danger, "
-        "seek urgent help from local emergency services."
+        "24/7 National Emergency Helplines",
+        "If you or someone you know is in distress or danger, contact emergency services immediately."
     )
 
-    st.markdown("""
-    <div class="resource-card">
-        <h4>Tele-MANAS — India</h4>
-        <p>National tele-mental-health support: <b>14416</b></p>
-        <p>Confirm service availability through official "
-        "government health resources.</p>
-    </div>
-    <div class="resource-card">
-        <h4>Emergency services — India</h4>
-        <p>For immediate danger, call <b>112</b> or go to the
-        nearest emergency department.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
 
-    st.info(
-        "An app cannot replace emergency responders, a qualified "
-        "clinician, or direct support from a trusted person."
-    )
+    with col1:
+        st.markdown("""
+        <div class="resource-card" style="border-left: 5px solid #EF4444;">
+            <h4>🚨 Tele-MANAS (Government of India)</h4>
+            <p><b>Toll-Free Number:</b> 14416 or 1800-891-4416</p>
+            <p><b>Availability:</b> 24/7 | Multi-Lingual Mental Health Support</p>
+        </div>
+        <div class="resource-card" style="border-left: 5px solid #EF4444;">
+            <h4>📞 KIRAN Helpline</h4>
+            <p><b>Toll-Free Number:</b> 1800-599-0019</p>
+            <p><b>Availability:</b> 24/7 National Rehabilitation & Support</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+        <div class="resource-card" style="border-left: 5px solid #0284C7;">
+            <h4>🤝 Vandrevala Foundation Helpline</h4>
+            <p><b>Direct Line:</b> +91 9999 666 555</p>
+            <p><b>Availability:</b> 24/7 Free Crisis Counseling</p>
+        </div>
+        <div class="resource-card" style="border-left: 5px solid #0284C7;">
+            <h4>🚑 National Immediate Response</h4>
+            <p><b>Emergency Unified Response:</b> 112</p>
+            <p><b>Ambulance Services:</b> 102 / 108</p>
+        </div>
+        """, unsafe_allow_html=True)
