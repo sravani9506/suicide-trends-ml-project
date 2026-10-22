@@ -35,6 +35,13 @@ st.markdown("""
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
+    .recommendation-card {
+        background-color: #1e222d;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #00d26a;
+        margin-bottom: 15px;
+    }
     h1, h2, h3 { color: #ffffff; }
     </style>
 """, unsafe_allow_html=True)
@@ -60,13 +67,19 @@ def load_recent_data():
     })
     return df.sort_values("Year")
 
-# Sidebar
+# Sidebar Navigation
 st.sidebar.title("📌 Navigation Menu")
-page = st.sidebar.radio("Go to", ["🏠 Dashboard", "📊 Data Analysis", "🤖 ML Trend Forecast"])
+page = st.sidebar.radio("Go to", [
+    "🏠 Dashboard", 
+    "📊 Data Analysis", 
+    "🤖 ML Trend Forecast", 
+    "💡 Prevention & Recommendations"
+])
 
 recent = load_recent_data()
 old = load_old_data()
 
+# 1. HOME DASHBOARD
 if page == "🏠 Dashboard":
     st.title("📈 Suicide Trends & Mental Health Data Analytics")
     st.markdown("---")
@@ -85,12 +98,13 @@ if page == "🏠 Dashboard":
     fig.update_traces(line_color='#00d26a', line_width=3)
     st.plotly_chart(fig, use_container_width=True)
 
+# 2. DATA ANALYSIS
 elif page == "📊 Data Analysis":
     st.title("📊 Detailed Data Explorations")
     if old is not None:
         causes_df = old[old["Type_code"] == "Causes"]
         
-        st.subheader("Top 10 Affected States (2001–2012)")
+        st.subheader("Top Affected States (2001–2012)")
         state_data = causes_df.groupby("State")["Total"].sum().reset_index().sort_values("Total", ascending=False).head(10)
         fig_state = px.bar(state_data, x="Total", y="State", orientation='h', template="plotly_dark", color="Total", color_continuous_scale="Reds")
         st.plotly_chart(fig_state, use_container_width=True)
@@ -110,13 +124,72 @@ elif page == "📊 Data Analysis":
     else:
         st.error("Historical Dataset not found.")
 
+# 3. ML TREND FORECAST
 elif page == "🤖 ML Trend Forecast":
     st.title("🤖 Future Trend Estimation (ML)")
     bundle = load_model()
     model = bundle["model"]
     
-    selected_year = st.slider("Select Year for Prediction", 2013, 2030, 2025)
+    selected_year = st.slider("Select Year for Prediction", 2013, 2030, 2026)
     if st.button("Generate Estimate"):
         prediction = model.predict(pd.DataFrame({"Year": [selected_year]}))[0]
         st.metric(f"Estimated Suicide Count for {selected_year}", f"{max(0, round(prediction)):,}")
         st.info("Note: This simple linear model uses historical data for trend forecasting.")
+
+# 4. PREVENTION & RECOMMENDATIONS (NEW PAGE)
+elif page == "💡 Prevention & Recommendations":
+    st.title("💡 Suicide Prevention Strategies & Recommendations")
+    st.markdown("Data analysis valla manaki prapancha/desha sthayi lo ekkada, evariki ekuva prabhavimchindo telusthundi. Daanini adharanga chesukoni kindhi pranalakalu amalu cheyavachu:")
+    st.markdown("---")
+    
+    # Select State for Specific Action Plan
+    if old is not None:
+        st.subheader("🎯 State-Specific Action Plan")
+        states_list = sorted(old["State"].unique())
+        selected_state = st.selectbox("Select State to view Awareness Strategy:", states_list)
+        
+        state_total = old[(old["State"] == selected_state) & (old["Type_code"] == "Causes")]["Total"].sum()
+        
+        st.markdown(f"""
+        <div class="recommendation-card">
+            <h4>📍 Strategy for {selected_state}</h4>
+            <p>Historical Total Recorded Cases (Causes): <b>{state_total:,}</b></p>
+            <ul>
+                <li><b>Targeted Community Camps:</b> High density areas and youth hubs lo local language awareness programs nirvahinchali.</li>
+                <li><b>Helpline Accessibility:</b> State-level tele-counseling hotlines and 24/7 support centers erpatu cheyali.</li>
+                <li><b>School & College Programs:</b> Youth (15-29 age group) kosam Stress Management and Mental Health Workshops.</li>
+            </ul>
+        </div>
+        """, unsafe_unsafe_html=True if hasattr(st, "unsafe_html") else True)
+
+    st.markdown("### 🏛️ Policy & Community Recommendations")
+    
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("""
+        <div class="recommendation-card">
+            <h4>👨‍🎓 Youth Focused Interventions (Age 15-29)</h4>
+            <ul>
+                <li><b>Academic Stress Reduction:</b> Exams & Career guidance counseling centers in schools/colleges.</li>
+                <li><b>Peer Support Groups:</b> Student-led mental health clubs to break social stigma.</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with c2:
+        st.markdown("""
+        <div class="recommendation-card">
+            <h4>🌾 Farmer & Financial Support Camps</h4>
+            <ul>
+                <li><b>Financial Counseling:</b> Agriculture/Debt management support centers in high-risk rural districts.</li>
+                <li><b>Community Outreach:</b> NGO and Local Health Worker (ASHA) training for early detection of distress.</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    st.markdown("### 📞 Emergency Helplines in India")
+    st.info("""
+    - **Tele-MANAS (Govt of India):** 14416 or 1800 891 4416 (24/7 Toll-Free)
+    - **KIRAN Mental Health Helpline:** 1800-599-0019
+    - **Vandrevala Foundation:** +91 9999 666 555
+    """)
